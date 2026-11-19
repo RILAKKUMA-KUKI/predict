@@ -1,6 +1,18 @@
 (() => {
   "use strict";
 
+  function preventZoom(event) {
+    event.preventDefault();
+  }
+  for (const type of ["gesturestart", "gesturechange", "gestureend"]) {
+    document.addEventListener(type, preventZoom, { passive: false });
+  }
+  document.addEventListener("touchmove", (event) => {
+    if (typeof event.scale === "number" && event.scale !== 1) {
+      event.preventDefault();
+    }
+  }, { passive: false });
+
   const POLL_MS = 45_000;
   const DATA_BRANCH_URL =
     "https://raw.githubusercontent.com/RILAKKUMA-KUKI/predict/data/quotes.json";
