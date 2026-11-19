@@ -459,29 +459,39 @@ def compute_levels(
 
     near_year_low = bool(low52 is not None and last <= float(low52) * 1.008)
 
-    if candidates_below:
-        support_val, support_note = max(candidates_below, key=lambda x: x[0])
+    # Support may use the 1-year low only when it is the nearest real low
+    # (no nearer short-term low). 跌穿 / breakDown never uses the 1-year low.
+    short_term_below = [item for item in candidates_below if item[1] != "近一年低位"]
+
+    if short_term_below:
+        support_val, support_note = max(short_term_below, key=lambda x: x[0])
     elif near_year_low and low52 is not None:
         support_val, support_note = float(low52), "近一年低位"
+    elif candidates_below:
+        support_val, support_note = max(candidates_below, key=lambda x: x[0])
     else:
         support_val, support_note = None, "暫無更近真實成交"
 
-    if near_year_low:
+    short_below_support = [
+        item for item in short_term_below
+        if support_val is not None and item[0] < support_val - eps
+    ]
+    # Do not invent a target below the observed ~1-year low.
+    if low52 is not None:
+        short_below_support = [
+            item for item in short_below_support
+            if item[0] >= float(low52) - eps
+        ]
+
+    if short_below_support:
+        down_val, down_note = max(short_below_support, key=lambda x: x[0])
+    elif near_year_low:
         # Already at / very near a ~1-year low: do not invent a lower target.
-        down_val, down_note = None, "已近一年低位，暫無更近真實成交"
+        down_val, down_note = None, "已近一年低位，暫無更近短線低位"
         if support_val is None and low52 is not None:
             support_val, support_note = float(low52), "近一年低位"
     else:
-        below_support = [
-            item for item in candidates_below
-            if support_val is not None and item[0] < support_val - eps
-        ]
-        if below_support:
-            down_val, down_note = max(below_support, key=lambda x: x[0])
-        elif low52 is not None and (support_val is None or low52 < support_val - eps):
-            down_val, down_note = float(low52), "近一年低位"
-        else:
-            down_val, down_note = None, "暫無更近真實成交"
+        down_val, down_note = None, "暫無更近短線低位"
 
     if candidates_above:
         up_val, up_note = min(candidates_above, key=lambda x: x[0])
@@ -619,7 +629,7 @@ def outlook_for(row: dict[str, Any], daily: list[dict[str, Any]], us_state_now: 
     if support_txt:
         weaken = f"跌破並失守約 {support_txt}，短線看法轉弱。"
     elif near_year_low:
-        weaken = "若再失守近一年低位，下方暫無更近真實成交參考。"
+        weaken = "已接近近一年低位，暫無更近短線低位可作跌穿參考。"
     else:
         weaken = "若失守近期低位，短線看法轉弱。"
 
@@ -627,13 +637,13 @@ def outlook_for(row: dict[str, Any], daily: list[dict[str, Any]], us_state_now: 
     if up_txt:
         risk_parts.append(f"上行參考 {up_txt}")
     if support_txt and down_txt:
-        risk_parts.append(f"下行失守 {support_txt} 後參考 {down_txt}")
+        risk_parts.append(f"下行失守 {support_txt} 後，短線跌穿參考 {down_txt}")
     elif support_txt and near_year_low:
-        risk_parts.append(f"下行失守 {support_txt} 後屬近一年低位，暫無更低下方參考")
+        risk_parts.append(f"下行失守 {support_txt} 後已近一年低位，暫無更近短線低位")
     elif near_year_low:
-        risk_parts.append("已近一年低位，暫無更低下方參考")
+        risk_parts.append("已近一年低位，暫無更近短線低位")
     elif support_txt:
-        risk_parts.append(f"下行失守 {support_txt} 後暫無更近真實成交參考")
+        risk_parts.append(f"下行失守 {support_txt} 後暫無更近短線低位")
     risk = "；".join(risk_parts) + "。短線看法按規則重計，並非保證。" if risk_parts else "短線看法按規則重計，並非保證。"
 
     return {"bias": bias, "view": view, "weaken": weaken, "risk": risk}
