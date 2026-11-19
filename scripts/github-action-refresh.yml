@@ -1,0 +1,59 @@
+name: Refresh quotes
+
+on:
+  schedule:
+    # Weekdays every 10 minutes (UTC). GitHub cron may drift or skip a tick.
+    - cron: "*/10 * * * 1-5"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - ".github/workflows/refresh.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-quotes
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout site
+        uses: actions/checkout@v4
+        with:
+          path: site
+
+      - name: Fetch previous snapshot
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: data
+          path: prev-data
+
+      - name: Refresh public quotes
+        run: |
+          PREV_ARGS=()
+          if [ -f prev-data/quotes.json ]; then
+            PREV_ARGS=(--prev prev-data/quotes.json)
+          fi
+          python3 site/scripts/refresh_quotes.py --out quotes.json "${PREV_ARGS[@]}"
+
+      - name: Publish data branch
+        run: |
+          work=$(mktemp -d)
+          cp quotes.json "$work/quotes.json"
+          cd "$work"
+          git init
+          git checkout -b data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add quotes.json
+          git commit -m "Refresh quotes snapshot"
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>美股標的觀察板</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-text">
+      <h1>美股標的觀察板</h1>
+      <p class="source-line" id="source-line">數據來源會喺讀取後顯示</p>
+    </div>
+    <div class="poll-status" id="poll-status" aria-live="polite">準備自動讀取數據…</div>
+  </header>
+
+  <main>
+    <section class="panel" aria-labelledby="times-heading">
+      <h2 id="times-heading">更新時間</h2>
+      <dl class="time-grid" id="time-grid">
+        <div><dt>頁面數據</dt><dd id="t-page">讀取中</dd></div>
+        <div><dt>來源拉取</dt><dd id="t-source">讀取中</dd></div>
+        <div><dt>美股正市</dt><dd id="t-us-reg">讀取中</dd></div>
+        <div><dt>美股夜盤／延伸</dt><dd id="t-us-ext">讀取中</dd></div>
+        <div><dt>港股／恒指</dt><dd id="t-hk">讀取中</dd></div>
+        <div><dt>XAUUSD</dt><dd id="t-xau">讀取中</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel" aria-labelledby="quotes-heading">
+      <div class="section-head">
+        <h2 id="quotes-heading">標的報價</h2>
+        <p class="section-note" id="quotes-note">觀察清單共 29 隻。</p>
+      </div>
+      <div class="controls">
+        <div class="tabs" id="tabs" role="tablist">
+          <button type="button" class="tab is-active" data-tab="all" role="tab" aria-selected="true">全部</button>
+          <button type="button" class="tab" data-tab="us_etf" role="tab" aria-selected="false">美股 ETF</button>
+          <button type="button" class="tab" data-tab="us_stock" role="tab" aria-selected="false">美股</button>
+          <button type="button" class="tab" data-tab="hk" role="tab" aria-selected="false">港股</button>
+          <button type="button" class="tab" data-tab="gold" role="tab" aria-selected="false">黃金</button>
+        </div>
+        <label class="field">
+          <span>篩選</span>
+          <input id="filter" type="search" placeholder="輸入代號或名稱" autocomplete="off">
+        </label>
+        <label class="field">
+          <span>排序</span>
+          <select id="sort">
+            <option value="default">預設</option>
+            <option value="pctDesc">升跌％高至低</option>
+            <option value="pctAsc">升跌％低至高</option>
+            <option value="nearHigh">距一年高位最近</option>
+            <option value="farHigh">距一年高位最遠</option>
+            <option value="posHigh">近一年位置高至低</option>
+          </select>
+        </label>
+      </div>
+      <div class="table-wrap">
+        <table id="quotes-table">
+          <thead>
+            <tr>
+              <th data-sort="code">代號</th>
+              <th data-sort="name">名稱</th>
+              <th class="num" data-sort="last">最新</th>
+              <th class="num" data-sort="change">升跌</th>
+              <th class="num" data-sort="changePct">升跌％</th>
+              <th class="num">開</th>
+              <th class="num">高</th>
+              <th class="num">低</th>
+              <th class="num">成交</th>
+              <th class="num">盤前／夜盤</th>
+              <th class="num" data-sort="pos52Pct">一年位置</th>
+              <th>走勢</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="empty hidden" id="quotes-empty">目前篩選沒有對應標的，可改分頁或清空篩選。</p>
+    </section>
+
+    <section class="panel" aria-labelledby="outlook-heading">
+      <div class="section-head">
+        <h2 id="outlook-heading">短線走勢預測</h2>
+        <p class="section-note">與今次數據一齊按規則重計，並非保證。</p>
+      </div>
+      <div class="table-wrap">
+        <table id="outlook-table">
+          <thead>
+            <tr>
+              <th>代號</th>
+              <th>名稱</th>
+              <th>看法</th>
+              <th>短線觀察</th>
+              <th class="num">支撐</th>
+              <th class="num">升穿</th>
+              <th>跌穿</th>
+              <th>什麼會削弱</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="chart-heading">
+      <div class="section-head">
+        <h2 id="chart-heading">近期走勢</h2>
+        <p class="section-note" id="chart-note">近 60 個交易日收市價；走勢圖係快照系列，唔係即時跳價。</p>
+      </div>
+      <div class="controls">
+        <label class="field">
+          <span>標的</span>
+          <select id="chart-symbol"></select>
+        </label>
+        <div class="tabs period-tabs" id="period-tabs" role="tablist">
+          <button type="button" class="tab is-active" data-period="daily" role="tab" aria-selected="true">日線</button>
+          <button type="button" class="tab" data-period="weekly" role="tab" aria-selected="false">週線</button>
+        </div>
+      </div>
+      <div class="chart-box" id="chart-box"></div>
+    </section>
+  </main>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
