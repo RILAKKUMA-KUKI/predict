@@ -16,9 +16,9 @@
 
 你唔使撳 F5，亦唔使等新連結。頁面大約每 45 秒自動讀取一次 `quotes.json`，數字會喺原位轉新。切返呢個分頁時亦會即刻再讀一次。
 
-報價快照設計上由 GitHub Actions 喺平日大約每 10 分鐘更新一次（GitHub 定時任務可能會偏離或漏跑），並寫入 `data` 分支上嘅單一 `quotes.json`（每次覆蓋，避免主分支 git 歷史膨脹）。前端會優先讀呢份檔案。
+報價快照由 GitHub Actions 喺平日大約每 5 分鐘更新一次（呢個係 GitHub 定時任務可設定嘅最快間隔，實際執行可能會偏離或漏跑），並寫入 `data` 分支上嘅單一 `quotes.json`（每次覆蓋，避免主分支 git 歷史膨脹）。前端會優先讀呢份檔案。
 
-工作流程定義喺 [`scripts/github-action-refresh.yml`](scripts/github-action-refresh.yml)。要正式啟用，請把呢份檔案放到 `.github/workflows/refresh.yml`（GitHub 需要 `workflow` 權限先可以經一般授權直接提交呢類檔案）。啟用之後，可喺 Actions 頁面用 “Refresh quotes” 手動跑一次。
+工作流程已安裝喺 [`.github/workflows/refresh.yml`](.github/workflows/refresh.yml)，倉庫內亦保留相同副本 [`scripts/github-action-refresh.yml`](scripts/github-action-refresh.yml)。可喺 Actions 頁面用 “Refresh quotes” 手動跑一次。
 
 ## 數據來源
 
