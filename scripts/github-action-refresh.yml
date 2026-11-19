@@ -2,8 +2,8 @@ name: Refresh quotes
 
 on:
   schedule:
-    # Weekdays every 10 minutes (UTC). GitHub cron may drift or skip a tick.
-    - cron: "*/10 * * * 1-5"
+    # Weekdays every 5 minutes (UTC), GitHub's practical cron minimum. Cron may drift or skip a tick.
+    - cron: "*/5 * * * 1-5"
   workflow_dispatch:
   push:
     branches: [main]
